@@ -1,5 +1,6 @@
 package com.digital.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,8 +21,6 @@ public class RestFulController {
 
 	@Autowired
 	UserService userService;
-
-	// List<User> users = userService.getAllUsers();
 
 	// First try using REST
 	@RequestMapping(value = { "/link" }, method = RequestMethod.GET)
@@ -41,7 +41,7 @@ public class RestFulController {
 		return new ResponseEntity<List<User>>(allUsers, HttpStatus.OK);
 	}
 
-	// Retrieving a single user
+	// Retrieving a single user with the given id.
 	@RequestMapping(value = { "/user/{id}" }, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<User> fetchUser(@PathVariable("id") Long id) {
 		User user = userService.getUser(id);
@@ -53,8 +53,8 @@ public class RestFulController {
 		}
 	}
 
-	// deleting a user
-	@RequestMapping(value = { "user/delete/{id}" }, method = RequestMethod.DELETE)
+	// deleting a user with the given id.
+	@RequestMapping(value = { "/user/delete/{id}" }, method = RequestMethod.DELETE)
 	public ResponseEntity<User> deleteUser(@PathVariable("id") Long id) {
 		User checkUser = userService.getUser(id);
 		if (checkUser == null) {
@@ -66,6 +66,31 @@ public class RestFulController {
 			System.out.println("User with  id : " + id + " has been deleted.");
 		}
 		return new ResponseEntity<User>(HttpStatus.NO_CONTENT);
+	}
+
+	// creating a new list of users.
+	@RequestMapping(value = "/createUser", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<User>> createMultipleUsers(@RequestBody ArrayList<User> userList) {
+		System.out.println(userList.toString());
+		if (userService.createNewUsers(userList)) {
+			System.out.println("All users saved.");
+		}
+
+		List<User> allUsers = userService.getAllUsers();
+		return new ResponseEntity<List<User>>(allUsers, HttpStatus.OK);
+	}
+
+	// delete multiple or selected users
+	@RequestMapping(value = "/deleteUsers", method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<User>> deleteMultipleUsers(@RequestBody ArrayList<User> deleteList) {
+		if (userService.deleteMultipleUsers(deleteList)) {
+			System.out.println("All selected users have been deleted.");
+		} else {
+			System.out.println("User deletion failed.");
+		}
+
+		List<User> allUsers = userService.getAllUsers();
+		return new ResponseEntity<List<User>>(allUsers, HttpStatus.OK);
 	}
 
 }
