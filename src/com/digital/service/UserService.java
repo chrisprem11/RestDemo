@@ -40,8 +40,8 @@ public class UserService {
 			user.setLastName(userList.get(i).getLastName());
 			try {
 				userRepository.save(user);
-				System.out.println("User with row ( "+i+" ) saved.");
-				value=true;
+				System.out.println("User with row ( " + i + " ) saved.");
+				value = true;
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.out.println("Something went wrong. User not saved.");
@@ -52,13 +52,47 @@ public class UserService {
 
 	public Boolean deleteMultipleUsers(ArrayList<User> deleteList) {
 		boolean value = false;
-		for(User object : deleteList){
+		for (User object : deleteList) {
 			long id = object.getpId();
 			userRepository.deleteUser(id);
-			System.out.println("User with id ( "+id+" ) deleted.");
-			value=true;
+			System.out.println("User with id ( " + id + " ) deleted.");
+			value = true;
 		}
 		return value;
+	}
+
+	public void updateUser(User currentUser) {
+		
+		userRepository.save(currentUser);
+	}
+
+	public Boolean udateMultipleUsers(ArrayList<User> updateList) {
+		boolean value = false;
+		for(User user : updateList){
+			long id  = user.getpId();
+			User currentUser = userRepository.findByPId(id);
+			currentUser.setFirstName(user.getFirstName());
+			currentUser.setLastName(user.getLastName());
+			try {
+				userRepository.save(currentUser);
+				value=true;
+				System.out.println("User with id ("+id+") is updated.");
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("Updation Failed");
+			}
+		}
+		return value;
+	}
+
+	public User createOneNewUser(User user) {
+		User newUser = new User();
+		newUser.setContact(user.getContact());
+		newUser.setEmail(user.getEmail());
+		newUser.setFirstName(user.getFirstName());
+		newUser.setLastName(user.getLastName());
+		return userRepository.save(newUser);
 	}
 
 }

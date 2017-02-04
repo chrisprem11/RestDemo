@@ -3,6 +3,7 @@ package com.digital.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -67,9 +68,23 @@ public class RestFulController {
 		}
 		return new ResponseEntity<User>(HttpStatus.NO_CONTENT);
 	}
+	
+	//Create One New User
+	@RequestMapping(value="/createOneUser" , method=RequestMethod.POST,consumes=MediaType.APPLICATION_JSON_VALUE,
+			produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<User> createOneUser(@RequestBody User user){
+		User newUser =userService.createOneNewUser(user);
+		if(newUser==null){
+			System.out.println("User creation failed.");
+		} else {
+			System.out.println("New user created successfully.");
+		}
+		return new ResponseEntity<User>(newUser, HttpStatus.OK);
+	}
 
 	// creating a new list of users.
-	@RequestMapping(value = "/createUser", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/createUser", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<User>> createMultipleUsers(@RequestBody ArrayList<User> userList) {
 		System.out.println(userList.toString());
 		if (userService.createNewUsers(userList)) {
@@ -81,7 +96,8 @@ public class RestFulController {
 	}
 
 	// delete multiple or selected users
-	@RequestMapping(value = "/deleteUsers", method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/deleteUsers", method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<User>> deleteMultipleUsers(@RequestBody ArrayList<User> deleteList) {
 		if (userService.deleteMultipleUsers(deleteList)) {
 			System.out.println("All selected users have been deleted.");
@@ -91,6 +107,32 @@ public class RestFulController {
 
 		List<User> allUsers = userService.getAllUsers();
 		return new ResponseEntity<List<User>>(allUsers, HttpStatus.OK);
+	}
+
+	// update an user with a given id
+	@RequestMapping(value = "/updateUser/{id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<User> updateUser(@PathVariable("id") Long id, @RequestBody User user) {
+		User currentUser = userService.getUser(id);
+		currentUser.setFirstName(user.getFirstName());
+		currentUser.setLastName(user.getLastName());
+		userService.updateUser(currentUser);
+
+		return new ResponseEntity<User>(currentUser, HttpStatus.OK);
+	}
+
+	// update multiple users
+	@RequestMapping(value = "updateUsers", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<User>> updateMultipleUsers(@RequestBody ArrayList<User> updateList) {
+		if(userService.udateMultipleUsers(updateList)){
+			System.out.println("All users have been updated.");
+		}
+		else {
+			System.out.println("Something went wrong. Updation Failed. ");
+		}
+		List<User> allUsers = userService.getAllUsers();
+
+		return new ResponseEntity<>(allUsers, HttpStatus.OK);
 	}
 
 }
